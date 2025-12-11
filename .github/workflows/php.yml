@@ -1,0 +1,40 @@
+name: deloyvietnix
+
+on:
+  push:
+    branches:
+      - main   # Nếu bạn dùng branch khác thì đổi lại
+  workflow_dispatch: # Cho phép chạy tay trong tab Actions
+
+jobs:
+  ftp-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: FTP Deploy to VietNix
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+
+          protocol: ftp
+          port: 21
+
+          # Thư mục code trên Git (thường để ./ là đủ)
+          local-dir: ./
+
+          # Thư mục web root trên host VietNix
+          server-dir: ${{ secrets.FTP_PATH }}
+
+          # Loại trừ các thư mục/file không cần upload
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.github/**
+            **/.vscode/**
+            **/.idea/**
+            **/.DS_Store
