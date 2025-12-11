@@ -1,0 +1,269 @@
+/* ================================
+   LOGIN PAGE – MODERN DARK THEME
+   ================================ */
+
+/* Nếu muốn an toàn, có thể đổi thành body.login-page {...} */
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #e5e7eb;
+    background:
+        radial-gradient(circle at top left, rgba(225,27,34,0.25), transparent 60%),
+        radial-gradient(circle at bottom right, rgba(56,189,248,0.20), transparent 60%),
+        #0f172a;
+}
+
+/* Wrapper tổng */
+.login-wrapper {
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+/* Card chính */
+.login-card {
+    width: 100%;
+    max-width: 380px;
+    background: rgba(15, 23, 42, 0.92);
+    border-radius: 20px;
+    padding: 28px 26px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+/* ================================
+   HEADER
+   ================================ */
+
+.login-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.login-header h2 {
+    margin: 0 0 6px;
+    font-size: 1.4rem;
+    color: #ffffff;
+}
+
+.login-header p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #cbd5e1;
+}
+
+/* ================================
+   ERROR BOX
+   ================================ */
+
+.login-error {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 14px;
+    padding: 10px 12px;
+
+    font-size: 0.85rem;
+    color: #fecaca;
+    background: rgba(127, 29, 29, 0.85);
+    border-radius: 10px;
+    border: 1px solid #7f1d1d;
+}
+
+/* ================================
+   FORM & INPUT
+   ================================ */
+
+.login-form .form-group {
+    margin-bottom: 14px;
+}
+
+.login-form label {
+    display: block;
+    margin-bottom: 6px;
+
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+}
+
+/* Group icon + input */
+.input-group {
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+
+    background: #020617;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.input-group i {
+    margin-right: 8px;
+    font-size: 0.9rem;
+    color: #9ca3af;
+}
+
+.input-group input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+
+    font-size: 0.9rem;
+    color: #e2e8f0;
+}
+
+.input-group input::placeholder {
+    color: #6b7280;
+}
+
+/* Focus rõ ràng, hỗ trợ cả tab */
+.input-group:focus-within {
+    border-color: #e11b22;
+    box-shadow: 0 0 0 2px rgba(225, 27, 34, 0.3);
+    background-color: #020617;
+}
+
+/* ================================
+   BUTTON
+   ================================ */
+
+.btn-login {
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px 14px;
+
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+
+    border-radius: 999px;
+    border: 1px solid #f87171;
+    cursor: pointer;
+
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #ffffff;
+    background: linear-gradient(135deg, #e11b22, #b91c1c);
+
+    box-shadow: 0 10px 24px rgba(248, 113, 113, 0.45);
+    transition:
+        background 0.25s ease,
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.btn-login:hover {
+    background: linear-gradient(135deg, #b91c1c, #7f1d1d);
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(248, 113, 113, 0.55);
+}
+
+/* Focus cho accessibility */
+.btn-login:focus-visible {
+    outline: 2px solid #f97373;
+    outline-offset: 2px;
+}
+
+.btn-login:active {
+    transform: translateY(0);
+    box-shadow: 0 8px 18px rgba(185, 28, 28, 0.7);
+}
+
+/* ================================
+   BOTTOM TEXT
+   ================================ */
+
+.login-bottom {
+    margin-top: 14px;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #cbd5e1;
+}
+
+.login-bottom a {
+    color: #38bdf8;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.login-bottom a:hover {
+    text-decoration: underline;
+}
+
+/* Demo account box */
+.login-demo-box {
+    margin-top: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(15,23,42,0.85);
+    border: 1px dashed rgba(148,163,184,0.5);
+    color: #e5e7eb;
+    display: grid;
+    gap: 8px;
+}
+
+.login-demo-box__title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #f97373;
+}
+
+.login-demo-box__item {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 6px 10px;
+    align-items: center;
+    font-size: 0.85rem;
+}
+
+.login-demo-box__creds {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.login-demo-box__item code {
+    display: inline-block;
+    padding: 6px 8px;
+    border-radius: 8px;
+    background: #0b1222;
+    border: 1px solid #1f2937;
+    color: #cbd5e1;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.8rem;
+    width: 100%;
+}
+
+/* ================================
+   RESPONSIVE
+   ================================ */
+
+@media (max-width: 480px) {
+    .login-card {
+        padding: 24px 18px;
+        border-radius: 18px;
+    }
+
+    .login-header h2 {
+        font-size: 1.25rem;
+    }
+}
