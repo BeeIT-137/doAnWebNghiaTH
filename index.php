@@ -73,7 +73,7 @@ $accessories = $accStmt->fetchAll();
             <div class="hero-slide">
                 <div>
                     <div class="hero-slide__headline">
-                        Trả góp 0% – duyệt nhanh trong 5 phút
+                        Trả góp 0% – duyệt nhanh trong 1 phút
                     </div>
                     <div class="hero-slide__sub">
                         Áp dụng cho nhiều dòng điện thoại Samsung, Xiaomi, Oppo... thủ tục online cực dễ.
