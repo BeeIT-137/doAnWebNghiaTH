@@ -1,23 +1,37 @@
 <?php
 
 /**
- * Cấu hình kết nối DB:
- * - Production (cPanel): dùng biến môi trường DB_HOST/DB_NAME/DB_USER/DB_PASS hoặc giá trị mặc định bên dưới.
- * - Local: đặt APP_ENV=local và tạo config/db.local.php để override (không upload file này lên host).
+ * Database config that works on both localhost and cPanel.
+ *
+ * Production (cPanel):
+ * - Use DB_HOST / DB_NAME / DB_USER / DB_PASS environment variables, or keep
+ *   the fallback values below in sync with your cPanel database.
+ *
+ * Local (WAMP/XAMPP/etc.):
+ * - Create config/db.local.php with your local credentials (this file is
+ *   intended to stay only on your machine).
+ * - APP_ENV=local forces the local config.
+ * - If APP_ENV is not set, requests from localhost/127.0.0.1 will
+ *   automatically load db.local.php when it exists.
  */
 
-$appEnv = getenv('APP_ENV') ?: 'production'; // đặt APP_ENV=local trên máy dev
+$localFile = __DIR__ . '/db.local.php';
+
+$appEnv = getenv('APP_ENV');
+if ($appEnv === false || $appEnv === '') {
+    $serverName = $_SERVER['SERVER_NAME'] ?? '';
+    $appEnv = ($serverName === 'localhost' || $serverName === '127.0.0.1') ? 'local' : 'production';
+}
 
 $config = [
-    'host'    => getenv('DB_HOST') ?: 'localhost',
-    'name'    => getenv('DB_NAME') ?: 'viakingv_phone_shop',   // sửa theo DB trên cPanel
-    'user'    => getenv('DB_USER') ?: 'viakingv_phone_shop',   // sửa theo user DB trên cPanel
-    'pass'    => getenv('DB_PASS') ?: 'viakingv_phone_shop',   // sửa theo pass DB trên cPanel
+    'host'    => getenv('DB_HOST') ?: 'localhost',            // cPanel DB host
+    'name'    => getenv('DB_NAME') ?: 'viakingv_phone_shop', // cPanel DB name
+    'user'    => getenv('DB_USER') ?: 'viakingv_phone_shop', // cPanel DB user
+    'pass'    => getenv('DB_PASS') ?: 'viakingv_phone_shop', // cPanel DB password
     'charset' => 'utf8mb4',
 ];
 
-// Chỉ override cấu hình local khi APP_ENV=local
-$localFile = __DIR__ . '/db.local.php';
+// Override with local credentials when in local environment
 if ($appEnv === 'local' && is_file($localFile)) {
     $local = include $localFile;
     if (is_array($local)) {
@@ -39,7 +53,7 @@ function getPDO(): PDO
                 PDO::ATTR_EMULATE_PREPARES   => false,
             ]);
         } catch (PDOException $e) {
-            die('Kết nối database thất bại: ' . $e->getMessage());
+            die('Ket noi database that bai: ' . $e->getMessage());
         }
     }
 
