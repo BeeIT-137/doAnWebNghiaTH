@@ -1,36 +1,44 @@
 <?php
 
 /**
- * Kết nối database MySQL bằng PDO
- * -------------------------------
- * - Sử dụng thông tin host / user / pass bên dưới
- * - Nếu bạn đổi tên database trong database.sql thì sửa DB_NAME cho khớp
+ * Cấu hình kết nối DB cho production (cPanel) và hỗ trợ override bằng db.local.php khi chạy localhost.
+ *
+ * - Production: set các biến môi trường DB_HOST/DB_NAME/DB_USER/DB_PASS trên host cPanel,
+ *   hoặc sửa các giá trị mặc định bên dưới cho đúng prefix DB của bạn.
+ * - Local: tạo file config/db.local.php trả về mảng cấu hình (xem db.local.php mẫu).
  */
 
-define('DB_HOST', 'localhost');      // host, thường là localhost
-define('DB_NAME', 'phone_shop');     // tên database
-define('DB_USER', 'root');           // user MySQL (XAMPP mặc định là root)
-define('DB_PASS', '');               // mật khẩu MySQL (XAMPP mặc định rỗng)
+$config = [
+    'host'    => getenv('DB_HOST') ?: 'localhost',
+    'name'    => getenv('DB_NAME') ?: 'viakingv_phone_shop',   // sửa theo DB trên cPanel
+    'user'    => getenv('DB_USER') ?: 'viakingv_phone_shop',   // sửa theo user DB trên cPanel
+    'pass'    => getenv('DB_PASS') ?: 'viakingv_phone_shop',   // sửa theo pass DB trên cPanel
+    'charset' => 'utf8mb4',
+];
 
-/**
- * Hàm trả về instance PDO dùng chung toàn project
- * Dùng: $pdo = getPDO();
- */
-function getPDO()
+// Override bằng cấu hình local nếu có
+$localFile = __DIR__ . '/db.local.php';
+if (is_file($localFile)) {
+    $local = include $localFile;
+    if (is_array($local)) {
+        $config = array_merge($config, array_intersect_key($local, $config));
+    }
+}
+
+function getPDO(): PDO
 {
     static $pdo = null;
+    global $config;
 
     if ($pdo === null) {
-        $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=utf8mb4';
-
+        $dsn = sprintf('mysql:host=%s;dbname=%s;charset=%s', $config['host'], $config['name'], $config['charset']);
         try {
-            $pdo = new PDO($dsn, DB_USER, DB_PASS, [
-                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION, // bật chế độ báo lỗi
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,       // trả về dạng mảng kết hợp
-                PDO::ATTR_EMULATE_PREPARES   => false,                  // dùng prepared statement thật
+            $pdo = new PDO($dsn, $config['user'], $config['pass'], [
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES   => false,
             ]);
         } catch (PDOException $e) {
-            // Bạn có thể log lỗi ra file, ở đây mình tạm die cho dễ debug
             die('Kết nối database thất bại: ' . $e->getMessage());
         }
     }
