@@ -1,12 +1,12 @@
 <?php
 
 /**
- * Cấu hình kết nối DB cho production (cPanel) và hỗ trợ override bằng db.local.php khi chạy localhost.
- *
- * - Production: set các biến môi trường DB_HOST/DB_NAME/DB_USER/DB_PASS trên host cPanel,
- *   hoặc sửa các giá trị mặc định bên dưới cho đúng prefix DB của bạn.
- * - Local: tạo file config/db.local.php trả về mảng cấu hình (xem db.local.php mẫu).
+ * Cấu hình kết nối DB:
+ * - Production (cPanel): dùng biến môi trường DB_HOST/DB_NAME/DB_USER/DB_PASS hoặc giá trị mặc định bên dưới.
+ * - Local: đặt APP_ENV=local và tạo config/db.local.php để override (không upload file này lên host).
  */
+
+$appEnv = getenv('APP_ENV') ?: 'production'; // đặt APP_ENV=local trên máy dev
 
 $config = [
     'host'    => getenv('DB_HOST') ?: 'localhost',
@@ -16,9 +16,9 @@ $config = [
     'charset' => 'utf8mb4',
 ];
 
-// Override bằng cấu hình local nếu có
+// Chỉ override cấu hình local khi APP_ENV=local
 $localFile = __DIR__ . '/db.local.php';
-if (is_file($localFile)) {
+if ($appEnv === 'local' && is_file($localFile)) {
     $local = include $localFile;
     if (is_array($local)) {
         $config = array_merge($config, array_intersect_key($local, $config));
