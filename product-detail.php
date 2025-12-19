@@ -4,11 +4,7 @@ require_once __DIR__ . '/includes/functions.php';
 
 $pdo = db();
 
-/**
- * XỬ LÝ THÊM VÀO GIỎ TỪ TRANG CHI TIẾT
- * - Nhận product_id, quantity, color, storage
- * - Nếu là "Mua ngay" -> chuyển thẳng sang checkout.php
- */
+// XỬ LÝ THÊM VÀO GIỎ HÀNG
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_to_cart') {
     $productId = (int)($_POST['product_id'] ?? 0);
     $quantity  = (int)($_POST['quantity'] ?? 1);
@@ -17,17 +13,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'add_t
 
     if ($productId > 0) {
         if ($quantity < 1) $quantity = 1;
-        // Hàm add_to_cart đã được chỉnh để nhận thêm màu & dung lượng
         add_to_cart($productId, $quantity, $color, $storage);
     }
 
-    // Nếu bấm nút "Mua ngay" => sang checkout luôn
+
     if (isset($_POST['buy_now']) && $_POST['buy_now'] === '1') {
         redirect('checkout.php');
         exit;
     }
 
-    // Còn lại (thêm giỏ) thì ở lại trang chi tiết (giữ slug)
     $slug = $_GET['slug'] ?? '';
     $qs   = $slug ? ('?slug=' . urlencode($slug)) : '';
     redirect('product-detail.php' . $qs);

@@ -1,15 +1,15 @@
 <?php
 // admin/user-edit.php
-require_once __DIR__ . '/../includes/admin_auth.php';
-$pdo = db();
+require_once __DIR__ . '/../includes/admin_auth.php'; // protect admin area
+$pdo = db(); // db connection
 
-$id = (int)($_GET['id'] ?? 0);
+$id = (int)($_GET['id'] ?? 0); // user id to edit from query string
 if ($id <= 0) {
     header('Location: users.php');
     exit;
 }
 
-$stmt = $pdo->prepare("SELECT * FROM users WHERE id = ? LIMIT 1");
+$stmt = $pdo->prepare("SELECT * FROM users WHERE id = ? LIMIT 1"); // load user data
 $stmt->execute([$id]);
 $user = $stmt->fetch();
 
@@ -18,15 +18,15 @@ if (!$user) {
     exit;
 }
 
-$currentUserId = current_user_id();
+$currentUserId = current_user_id(); // prevent locking self out
 $errors = [];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
-    $email    = trim($_POST['email'] ?? '');
-    $phone    = trim($_POST['phone'] ?? '');
-    $role     = (int)($_POST['role'] ?? 2);
-    $password = $_POST['password'] ?? '';
+    $username = trim($_POST['username'] ?? ''); // display name
+    $email    = trim($_POST['email'] ?? '');    // email login
+    $phone    = trim($_POST['phone'] ?? '');    // optional phone
+    $role     = (int)($_POST['role'] ?? 2);     // 1=admin,2=user
+    $password = $_POST['password'] ?? '';       // new password if provided
 
     if ($username === '' || $email === '') {
         $errors[] = 'Tên và email không được để trống.';
@@ -42,13 +42,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errors)) {
         // Kiểm tra email trùng
-        $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? AND id <> ?");
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? AND id <> ?"); // ensure email unique
         $stmt->execute([$email, $id]);
         if ($stmt->fetch()) {
             $errors[] = 'Email này đã được sử dụng bởi tài khoản khác.';
         } else {
             // Cập nhật
-            if ($password !== '') {
+            if ($password !== '') { // update password only when provided
                 $hash = password_hash($password, PASSWORD_DEFAULT);
                 $updateSql = "
                     UPDATE users
@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute($params);
 
             // Nếu sửa chính mình → cập nhật session
-            if ($id === $currentUserId) {
+            if ($id === $currentUserId) { // keep session in sync if editing self
                 $_SESSION['user']['username'] = $username;
                 $_SESSION['user']['email']    = $email;
                 $_SESSION['user']['phone']    = $phone;

@@ -5,16 +5,16 @@
 require_once __DIR__ . '/../includes/admin_auth.php';
 // admin_auth.php đã require functions.php → có db(), make_slug(), require_admin(), upload_image()...
 
-require_admin();
-$pdo = db();
+require_admin(); // ensure only admin can access
+$pdo = db(); // database connection
 
 // Lấy danh mục
-$stmtCat = $pdo->query("SELECT id, name FROM categories ORDER BY name ASC");
+$stmtCat = $pdo->query("SELECT id, name FROM categories ORDER BY name ASC"); // preload category list
 $categories = $stmtCat->fetchAll(PDO::FETCH_ASSOC);
 
 // Xác định đang thêm mới hay sửa
-$id     = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-$isEdit = $id > 0;
+$id     = isset($_GET['id']) ? (int)$_GET['id'] : 0; // product id when editing
+$isEdit = $id > 0; // flag edit vs create
 
 $product  = null;
 $variants = [];
@@ -22,7 +22,7 @@ $selectedCategoryIds = [];
 
 if ($isEdit) {
     // Lấy thông tin sản phẩm
-    $stmt = $pdo->prepare("SELECT * FROM products WHERE id = ? LIMIT 1");
+    $stmt = $pdo->prepare("SELECT * FROM products WHERE id = ? LIMIT 1"); // load product data for editing
     $stmt->execute([$id]);
     $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -31,13 +31,13 @@ if ($isEdit) {
     }
 
     // Lấy danh sách biến thể
-    $stmtVar = $pdo->prepare("SELECT * FROM product_variants WHERE product_id = ? ORDER BY id ASC");
+    $stmtVar = $pdo->prepare("SELECT * FROM product_variants WHERE product_id = ? ORDER BY id ASC"); // existing variants
     $stmtVar->execute([$id]);
     $variants = $stmtVar->fetchAll(PDO::FETCH_ASSOC);
 
     // Lấy danh mục đã chọn cho sản phẩm (nếu sử dụng bảng product_categories)
     $selectedCategoryIds = [];
-    $stmtProdCat = $pdo->prepare("SELECT category_id FROM product_categories WHERE product_id = ? ORDER BY category_id ASC");
+    $stmtProdCat = $pdo->prepare("SELECT category_id FROM product_categories WHERE product_id = ? ORDER BY category_id ASC"); // categories selected for product
     $stmtProdCat->execute([$id]);
     $selectedCategoryIds = $stmtProdCat->fetchAll(PDO::FETCH_COLUMN);
 }
@@ -48,37 +48,37 @@ $success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Nhận mảng danh mục (hỗ trợ chọn nhiều)
-    $category_ids = $_POST['category_ids'] ?? [];
+    $category_ids = $_POST['category_ids'] ?? []; // checkbox list of categories
     if (!is_array($category_ids)) $category_ids = [$category_ids];
     $category_ids = array_values(array_filter(array_map('intval', $category_ids), function ($v) {
         return $v > 0;
     }));
 
-    $name        = trim($_POST['name'] ?? '');
-    $slug        = trim($_POST['slug'] ?? '');
-    $price       = (int)($_POST['price'] ?? 0);
-    $old_price   = $_POST['old_price'] !== '' ? (int)$_POST['old_price'] : null;
-    $description = trim($_POST['description'] ?? '');
-    $specs       = trim($_POST['specs'] ?? '');
-    $stock       = (int)($_POST['stock'] ?? 0);
+    $name        = trim($_POST['name'] ?? ''); // product title
+    $slug        = trim($_POST['slug'] ?? ''); // friendly URL slug
+    $price       = (int)($_POST['price'] ?? 0); // base price (no variants)
+    $old_price   = $_POST['old_price'] !== '' ? (int)$_POST['old_price'] : null; // compare-at price
+    $description = trim($_POST['description'] ?? ''); // short description
+    $specs       = trim($_POST['specs'] ?? ''); // specs text
+    $stock       = (int)($_POST['stock'] ?? 0); // base stock when no variants
 
     // Ảnh cũ (nếu đang sửa)
-    $imageOld    = $_POST['image_old'] ?? ($product['image'] ?? null);
+    $imageOld    = $_POST['image_old'] ?? ($product['image'] ?? null); // keep old main image path
 
     if (empty($category_ids) || $name === '') {
         $error = 'Vui lòng chọn ít nhất một danh mục và nhập tên sản phẩm.';
     } else {
         if ($slug === '') {
-            $slug = make_slug($name);
+            $slug = make_slug($name); // auto-generate slug from name
         }
 
         // Upload ảnh chính sản phẩm
         // - Nếu không chọn file → giữ nguyên $imageOld
         // - Nếu chọn file hợp lệ → lưu file, trả về path mới
-        $image = upload_image('image', $imageOld);
+        $image = upload_image('image', $imageOld); // handle main image upload (keep old if none)
 
         // Lấy primary category để lưu vào cột category_id của bảng products (để tương thích)
-        $primary_category_id = $category_ids[0] ?? 0;
+        $primary_category_id = $category_ids[0] ?? 0; // store first chosen category to products table
 
         try {
             $pdo->beginTransaction();
@@ -141,15 +141,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // ==========================
 
             // Xóa sạch biến thể cũ, thêm lại từ form
-            $stmtDelVar = $pdo->prepare("DELETE FROM product_variants WHERE product_id = ?");
+            $stmtDelVar = $pdo->prepare("DELETE FROM product_variants WHERE product_id = ?"); // clear old variants before reinsert
             $stmtDelVar->execute([$productId]);
 
-            $variant_colors     = $_POST['variant_color']      ?? [];
+            
+//
+            $variant_colors     = $_POST['variant_color']      ?? []; // submitted variant fields (same index grouped)
             $variant_storages   = $_POST['variant_storage']    ?? [];
             $variant_image_old  = $_POST['variant_image_old']  ?? [];
             $variant_prices     = $_POST['variant_price']      ?? [];
             $variant_old_price  = $_POST['variant_old_price']  ?? [];
             $variant_stocks     = $_POST['variant_stock']      ?? [];
+//
+
 
             $hasVariant = false;
             $minPrice   = null;
@@ -161,7 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         (product_id, color, storage, image, price, old_price, stock)
                     VALUES
                         (:product_id, :color, :storage, :image, :price, :old_price, :stock)
-                ");
+                "); // prepared insert for each variant row
 
                 foreach ($variant_colors as $idx => $color) {
                     $color   = trim($color);
@@ -177,7 +181,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     // Chuẩn hóa FILES cho ảnh biến thể index $idx
                     $fileFieldName = 'variant_image_' . $idx;
 
-                    if (!empty($_FILES['variant_image']['name'][$idx])) {
+                    if (!empty($_FILES['variant_image']['name'][$idx])) { // map multi-upload entry to single slot
                         // Map từ mảng variant_image[] sang một field "phẳng" để dùng upload_image()
                         $_FILES[$fileFieldName] = [
                             'name'     => $_FILES['variant_image']['name'][$idx],
@@ -215,7 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             // Nếu có biến thể → cập nhật lại price & stock của products
-            if ($hasVariant) {
+            if ($hasVariant) { // sync base price/stock to aggregated variant values
                 $stmtUpdate = $pdo->prepare("UPDATE products SET price = ?, stock = ? WHERE id = ?");
                 $stmtUpdate->execute([
                     $minPrice !== null ? $minPrice : $price,
@@ -226,11 +230,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Lưu các danh mục cho sản phẩm (bảng product_categories)
             // Xóa các liên kết cũ rồi thêm các liên kết mới từ form
-            $stmtDelProdCat = $pdo->prepare("DELETE FROM product_categories WHERE product_id = ?");
+            $stmtDelProdCat = $pdo->prepare("DELETE FROM product_categories WHERE product_id = ?"); // reset category mapping
             $stmtDelProdCat->execute([$productId]);
 
             if (!empty($category_ids)) {
-                $stmtInsProdCat = $pdo->prepare("INSERT INTO product_categories (product_id, category_id) VALUES (?, ?)");
+                $stmtInsProdCat = $pdo->prepare("INSERT INTO product_categories (product_id, category_id) VALUES (?, ?)"); // reinsert new mapping
                 foreach ($category_ids as $cat_id) {
                     $stmtInsProdCat->execute([$productId, $cat_id]);
                 }

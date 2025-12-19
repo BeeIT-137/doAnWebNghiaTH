@@ -2,15 +2,15 @@
 // admin/products.php
 // Quản lý sản phẩm + hiển thị thông tin biến thể
 
-require_once __DIR__ . '/../includes/admin_auth.php';
-require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/admin_auth.php'; // protect admin pages
+require_once __DIR__ . '/../includes/functions.php'; // helper utilities
 
 
-$pdo = db();
+$pdo = db(); // database handle
 
 // Xử lý xóa sản phẩm
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
-    $id = (int)($_POST['id'] ?? 0);
+    $id = (int)($_POST['id'] ?? 0); // product id to delete
     if ($id > 0) {
         $stmt = $pdo->prepare("DELETE FROM products WHERE id = ?");
         $stmt->execute([$id]);
@@ -19,9 +19,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
 }
 
 // Tìm kiếm theo tên / ID
-$search = trim($_GET['q'] ?? '');
+$search = trim($_GET['q'] ?? ''); // keyword for ID/name search
 
-// Lấy sản phẩm + danh mục + thông tin biến thể (đếm, min/max giá, tổng stock)
+// Lấy sản phẩm + danh mục + thông tin biến thể (đếm, min/max giá, tổng stock) //
 $sql = "
     SELECT 
         p.*,
@@ -42,11 +42,11 @@ $sql = "
         FROM product_variants
         GROUP BY product_id
     ) v ON v.product_id = p.id
-";
+"; 
 
 $params = [];
 if ($search !== '') {
-    $sql .= " WHERE p.id = :idExact OR p.name LIKE :kw";
+    $sql .= " WHERE p.id = :idExact OR p.name LIKE :kw"; // filter by id or name
     $params[':idExact'] = (int)$search;
     $params[':kw']      = '%' . $search . '%';
 }

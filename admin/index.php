@@ -1,31 +1,31 @@
 <?php
 // admin/index.php
-require_once __DIR__ . '/../includes/admin_auth.php';
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/../includes/admin_auth.php'; // enforce admin login + helpers
+require_once __DIR__ . '/includes/header.php'; // load shared admin layout
 
 
-$pdo = db();
+$pdo = db(); // database handle
 
 // Tổng số user
-$totalUsers = (int)$pdo->query("SELECT COUNT(*) FROM users")->fetchColumn();
+$totalUsers = (int)$pdo->query("SELECT COUNT(*) FROM users")->fetchColumn(); // total accounts
 
 // Tổng số sản phẩm
-$totalProducts = (int)$pdo->query("SELECT COUNT(*) FROM products")->fetchColumn();
+$totalProducts = (int)$pdo->query("SELECT COUNT(*) FROM products")->fetchColumn(); // total products
 
 // Tổng số đơn hàng
-$totalOrders = (int)$pdo->query("SELECT COUNT(*) FROM orders")->fetchColumn();
+$totalOrders = (int)$pdo->query("SELECT COUNT(*) FROM orders")->fetchColumn(); // total orders
 
 // Doanh thu (sum total đơn completed)
 $totalRevenue = (float)$pdo->query("
     SELECT COALESCE(SUM(total),0) FROM orders WHERE status = 'completed'
-")->fetchColumn();
+")->fetchColumn(); // revenue from completed orders
 
 // Đơn hàng theo trạng thái
 $statusCountsStmt = $pdo->query("
     SELECT status, COUNT(*) as cnt
     FROM orders
     GROUP BY status
-");
+"); // count orders grouped by status
 $statusCounts = $statusCountsStmt->fetchAll();
 ?>
 

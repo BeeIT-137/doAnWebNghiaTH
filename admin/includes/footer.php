@@ -3,10 +3,12 @@
 </div> <!-- .admin-layout -->
 
 <!-- Chart.js cho trang thống kê -->
+<!-- Chart.js for admin stats charts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <!-- Toggle sidebar admin trên mobile -->
 <script>
+// Toggle admin sidebar on small screens
 document.addEventListener('DOMContentLoaded', function () {
     const layout   = document.querySelector('.admin-layout');
     const btnMenu  = document.getElementById('adminMenuToggle');

@@ -158,6 +158,7 @@ $accessories = $accStmt->fetchAll();
 <!-- DANH MỤC NỔI BẬT -->
 <section class="section">
     <div class="section-header">
+        <h1>Pham Anh Dung_Ca cuoi</h1>
         <h2>Danh mục nổi bật</h2>
         <a href="product-list.php">Xem tất cả sản phẩm</a>
     </div>

@@ -1,18 +1,20 @@
 <?php
 // admin/users.php
-require_once __DIR__ . '/../includes/admin_auth.php';
-$pdo = db();
+require_once __DIR__ . '/../includes/admin_auth.php'; // enforce admin access
+$pdo = db(); // db connection
 
-$currentUserId = current_user_id();
+$currentUserId = current_user_id(); // track current admin to prevent self-delete
 
 // Xử lý xóa user
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delete') {
-    $id = (int)($_POST['id'] ?? 0);
+    $id = (int)($_POST['id'] ?? 0); // user id to remove
 
+//
     if ($id > 0 && $id !== $currentUserId && $id !== 1) { // tránh xóa chính mình và user ID 1
-        $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+        $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?"); // delete only if not current/primary admin
         $stmt->execute([$id]);
     }
+//
 
     header('Location: users.php');
     exit;
@@ -21,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'delet
 require_once __DIR__ . '/includes/header.php';
 
 // Lấy danh sách user
-$stmt = $pdo->query("SELECT * FROM users ORDER BY created_at DESC");
+$stmt = $pdo->query("SELECT * FROM users ORDER BY created_at DESC"); // fetch all users newest first
 $users = $stmt->fetchAll();
 ?>
 

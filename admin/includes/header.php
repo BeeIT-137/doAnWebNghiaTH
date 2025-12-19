@@ -1,17 +1,18 @@
 <?php
+// file header admin layout
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
 // Check quyền admin + load hàm chung
-require_once __DIR__ . '/../../includes/admin_auth.php';
-require_once __DIR__ . '/../../includes/functions.php';
+require_once __DIR__ . '/../../includes/admin_auth.php'; // include admin auth middleware
+require_once __DIR__ . '/../../includes/functions.php'; // include shared helper functions
 
-$pdo         = db();
-$currentUser = $_SESSION['user'] ?? null;
+$pdo         = db(); // database handle for admin pages
+$currentUser = $_SESSION['user'] ?? null; // info of logged-in admin (if any)
 
 // Xác định file hiện tại để active menu
-$currentPage = basename($_SERVER['PHP_SELF']);
+$currentPage = basename($_SERVER['PHP_SELF']); // current php file name for active menu
 ?>
 <!DOCTYPE html>
 <html lang="vi">

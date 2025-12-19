@@ -1,7 +1,7 @@
 <?php
 // admin/stats.php
-require_once __DIR__ . '/../includes/admin_auth.php';
-$pdo = db();
+require_once __DIR__ . '/../includes/admin_auth.php'; // protect admin stats page
+$pdo = db(); // db connection
 
 // Doanh thu theo ngày 7 ngày gần nhất
 $revenueStmt = $pdo->query("
@@ -11,7 +11,7 @@ $revenueStmt = $pdo->query("
       AND created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
     GROUP BY DATE(created_at)
     ORDER BY order_date ASC
-");
+"); // revenue of last 7 days for completed orders
 $revenueRows = $revenueStmt->fetchAll();
 
 $labels = [];
@@ -26,7 +26,7 @@ $statusStmt = $pdo->query("
     SELECT status, COUNT(*) AS cnt
     FROM orders
     GROUP BY status
-");
+"); // count orders grouped by status
 $statusRows = $statusStmt->fetchAll();
 
 $statusLabels = [];

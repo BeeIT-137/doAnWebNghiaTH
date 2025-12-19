@@ -5,14 +5,13 @@ require_once __DIR__ . '/includes/functions.php';
 $pdo       = db();
 $csrfToken = generate_csrf_token();
 
-/**
- * XỬ LÝ POST: cập nhật số lượng / xóa 1 dòng / xóa toàn bộ
- * LƯU Ý: xử lý TRƯỚC khi require header để không bị lỗi header already sent
- */
+
+//
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
         redirect('cart.php');
     }
+//
 
     // Xóa toàn bộ giỏ
     if (isset($_POST['clear'])) {
@@ -29,7 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Cập nhật số lượng (từ input name="items[key]")
+
+// 
     if (!empty($_POST['items']) && is_array($_POST['items'])) {
         foreach ($_POST['items'] as $key => $qty) {
             $qty = (int)$qty;
@@ -39,6 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 }
+//
+
 
 // LẤY GIỎ HÀNG TỪ SESSION
 $cartItems = get_cart_items();

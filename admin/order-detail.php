@@ -1,10 +1,10 @@
 <?php
 // admin/order-detail.php
-require_once __DIR__ . '/includes/header.php';
+require_once __DIR__ . '/includes/header.php'; // load admin layout + auth/DB helpers
 
-$pdo = db();
+$pdo = db(); // database connection
 
-$id = (int)($_GET['id'] ?? 0);
+$id = (int)($_GET['id'] ?? 0); // order id from query string
 if ($id <= 0) {
     header('Location: orders.php');
     exit;
@@ -12,14 +12,14 @@ if ($id <= 0) {
 
 // Cập nhật trạng thái từ trang chi tiết
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'update_status') {
-    $status  = $_POST['status'] ?? 'pending';
-    $allowed = ['pending', 'processing', 'completed', 'cancelled'];
+    $status  = $_POST['status'] ?? 'pending'; // new status chosen from form
+    $allowed = ['pending', 'processing', 'completed', 'cancelled']; // whitelist
 
     if (in_array($status, $allowed, true)) {
         try {
             $pdo->beginTransaction();
 
-            $stmtCheck = $pdo->prepare("SELECT status FROM orders WHERE id = ? FOR UPDATE");
+            $stmtCheck = $pdo->prepare("SELECT status FROM orders WHERE id = ? FOR UPDATE"); // lock order row
             $stmtCheck->execute([$id]);
             $orderRow = $stmtCheck->fetch(PDO::FETCH_ASSOC);
 
@@ -28,9 +28,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
 
                 if ($oldStatus !== $status) {
                     if ($oldStatus !== 'completed' && $status === 'completed') {
-                        adjust_order_stock($pdo, $id, 'deduct');
+                        adjust_order_stock($pdo, $id, 'deduct'); // moving to completed -> subtract stock
                     } elseif ($oldStatus === 'completed' && $status !== 'completed') {
-                        adjust_order_stock($pdo, $id, 'return');
+                        adjust_order_stock($pdo, $id, 'return'); // leaving completed -> return stock
                     }
 
                     $stmtUpdate = $pdo->prepare("UPDATE orders SET status = ? WHERE id = ?");
@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'updat
 }
 
 // Lấy thông tin đơn
-$stmt = $pdo->prepare("SELECT * FROM orders WHERE id = ? LIMIT 1");
+$stmt = $pdo->prepare("SELECT * FROM orders WHERE id = ? LIMIT 1"); // fetch single order
 $stmt->execute([$id]);
 $order = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -67,7 +67,7 @@ $stmtItems = $pdo->prepare("
     FROM order_items oi
     INNER JOIN products p ON oi.product_id = p.id
     WHERE oi.order_id = ?
-");
+"); // order line items with product info
 $stmtItems->execute([$id]);
 $items = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
 ?>
